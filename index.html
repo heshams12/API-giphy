@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Giphy</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles/style.css">
+ 
+    
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="row text-center guide"><h4>Click to see your favorite athlete in a GIF! You can add your own athlete as</h4></div>
+    <div class="row text-center tag-row" id="athletes"></div>
+    <div class="row text-center category-row">
+      <input type="" name="" id="athlete"><button class="btn btn-secondary" id="addAthlete">Add Athlete</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="gif-here"></div>
+  </div>
+
+  <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+  <script type="text/javascript">
+
+    var athletes = ["Lebron James", "Lionel Messi", "Odell Beckham Jr.", "Derek Jeter", "Rafael Nadal", "Derek Carr"];
+
+    // Function for displaying movie data
+      function renderButtons() {
+
+        $("#athletes").empty();
+
+        for (var i = 0; i < athletes.length; i++) {
+          $("#athletes").append('<button class="athlete-buttons btn btn-primary">' + athletes[i] + '</button>');
+        }      
+
+      } 
+
+    // Add tags function // 
+
+    $(document).on('click', '#addAthlete', function(event) {
+
+      event.preventDefault();
+
+      var newAthlete = $("#athlete").val().trim();
+      athletes.push(newAthlete);
+
+      $("#athletes").append('<button class="athlete-buttons btn btn-primary">' + newAthlete + '</button>');
+
+    });
+
+    // Tag button function //
+
+    $(document).on('click', '.athlete-buttons', function(event) {
+
+      // Keeps page from reloading //
+      event.preventDefault();
+
+      var type = this.innerText;
+      console.log(this.innerText);
+      var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + window.encodeURI(type) + "&limit=10&api_key=wHtA7KPHPV7atFLWZRNZRfTBQ34Rc8TZ";
+
+      $.ajax({
+        url: queryURL,
+        method: "GET"
+      }).done(function(response) {
+        var results = response.data;
+        for (var i = 0; i < response.data.length; i++) {
+            var gifDiv = $("<div class='item'>");
+            var rating = results[i].rating;
+            var p = $("<p>").text("Rating: " + rating);
+            $("#gif-here").append('<img class="gif" src="' + response.data[i].images.fixed_height_still.url + '">');
+            gifDiv.prepend(p);
+            $("#gif-here").append(gifDiv);
+          }  
+        });
+
+      $("#gif-here").empty();
+
+    });
+    renderButtons();
+
+    $('body').on('click', '.gif', function() {
+    	var src = $(this).attr("src");
+      if($(this).hasClass('playing')){
+         //stop
+         $(this).attr('src', src.replace(/\.gif/i, "_s.gif"))
+         $(this).removeClass('playing');
+      } else {
+        //play
+        $(this).addClass('playing');
+        $(this).attr('src', src.replace(/\_s.gif/i, ".gif"))
+      }
+    });
+  </script>
+</body>
+</html>
